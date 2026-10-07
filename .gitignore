@@ -1,0 +1,9 @@
+/vendor/
+/composer.phar
+/.idea/
+/.vscode/
+*.log
+/storage/*.sqlite
+/public/uploads/jugadores/*
+!/public/uploads/jugadores/.gitkeep
+docs/*

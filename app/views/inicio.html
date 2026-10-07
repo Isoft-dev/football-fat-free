@@ -1,0 +1,51 @@
+<include href="partials/cabecera.html"/>
+
+<section class="hero">
+    <div class="hero-copy">
+        <p class="hero-kicker">Torneo infantil</p>
+        <h2 class="hero-titulo">Fútbol</h2>
+        <p class="hero-subtitulo">Infantil</p>
+        <p class="lead">Antes de anotar goles, deje listos los equipos y el calendario. Luego entre el plantel, el marcador y las tarjetas. Los reportes se arman solos con esos datos.</p>
+        <div class="acciones hero-acciones">
+            <a class="boton" href="{{ @BASE }}/equipos">Empezar</a>
+            <a class="boton secundario" href="{{ @BASE }}/jugadores">Ver plantel</a>
+        </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+        <span class="hero-luz"></span>
+        <span class="hero-marca">07</span>
+        <svg class="hero-jugador" viewBox="0 0 240 320" fill="none">
+            <circle cx="118" cy="46" r="22" fill="#111"/>
+            <rect x="34" y="78" width="58" height="14" rx="7" transform="rotate(-32 34 78)" fill="#111"/>
+            <rect x="148" y="70" width="62" height="14" rx="7" transform="rotate(28 148 70)" fill="#111"/>
+            <path d="M86 78h64l10 92H78Z" fill="#111"/>
+            <path d="M80 168h76l8 34h-38l-8-18h-10l-8 18H74Z" fill="#111"/>
+            <rect x="94" y="200" width="16" height="78" rx="8" fill="#111"/>
+            <rect x="130" y="200" width="16" height="68" rx="8" transform="rotate(18 130 200)" fill="#111"/>
+            <circle cx="186" cy="278" r="20" fill="#111"/>
+            <circle cx="186" cy="278" r="7" fill="#fff"/>
+            <path d="M174 270 198 286M178 288 194 268" stroke="#fff" stroke-width="2"/>
+        </svg>
+    </div>
+</section>
+
+<section class="marcador" id="resumen">
+    <article class="marcador-celda"><strong id="n-equipos">—</strong><span>Equipos</span></article>
+    <article class="marcador-celda"><strong id="n-jornadas">—</strong><span>Jornadas</span></article>
+    <article class="marcador-celda"><strong id="n-jugadores">—</strong><span>Jugadores</span></article>
+    <article class="marcador-celda"><strong id="n-goles">—</strong><span>Goles</span></article>
+    <article class="marcador-celda"><strong id="n-incidencias">—</strong><span>Tarjetas</span></article>
+</section>
+
+<section class="panel">
+    <h2>Cómo se arma el torneo</h2>
+    <ol class="pasos">
+        <li>Crear el catálogo de equipos.</li>
+        <li>Habilitar las jornadas y sus fechas de juego.</li>
+        <li>Dar de alta jugadores con fotografía.</li>
+        <li>Registrar goles e incidencias.</li>
+        <li>Consultar los reportes del árbitro, incidencias y goleadores.</li>
+    </ol>
+</section>
+
+<include href="partials/pie.html"/>

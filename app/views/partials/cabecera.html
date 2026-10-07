@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" data-base="{{ @BASE }}" data-page="{{ @page }}" style="--acento-form: {{ @acento }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ @title }} · Torneo infantil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @view-transition { navigation: none; }
+        html, body, .main, .panel, .topbar, .tabla-wrap thead th { transition: none !important; }
+    </style>
+    <link rel="stylesheet" href="{{ @BASE }}/assets/css/app.css?v=5">
+</head>
+<body data-page="{{ @page }}">
+    <div id="alertas" class="alertas" aria-live="polite"></div>
+    <div id="confirmacion" class="confirmacion" hidden>
+        <div class="confirmacion-caja" role="dialog" aria-modal="true" aria-labelledby="confirmacion-texto">
+            <p id="confirmacion-texto"></p>
+            <div class="acciones">
+                <button type="button" class="peligro" id="confirmacion-aceptar">Eliminar</button>
+                <button type="button" class="secundario" id="confirmacion-cancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <div class="fondo-escena" aria-hidden="true"></div>
+    <div class="grano" aria-hidden="true"></div>
+    <div class="escena">
+    <div class="app">
+        <header class="masthead">
+            <a class="marca" href="{{ @BASE }}/">
+                <span class="logo-marca" aria-hidden="true">07</span>
+                <div>
+                    <p class="brand-kicker">Torneo infantil</p>
+                    <p class="brand">Fútbol</p>
+                </div>
+            </a>
+            <nav class="nav-principal" aria-label="Principal">
+                <div class="nav-grupo">
+                    <span class="nav-label">Catálogos</span>
+                    <div class="nav-grupo-links">
+                        <a href="{{ @BASE }}/equipos" class="{{ @page=='equipos' ? 'activa' : '' }}">Equipos</a>
+                        <a href="{{ @BASE }}/jornadas" class="{{ @page=='jornadas' ? 'activa' : '' }}">Jornadas</a>
+                        <a href="{{ @BASE }}/jugadores" class="{{ @page=='jugadores' || @page=='ficha' ? 'activa' : '' }}">Jugadores</a>
+                    </div>
+                </div>
+                <div class="nav-grupo">
+                    <span class="nav-label">Registro</span>
+                    <div class="nav-grupo-links">
+                        <a href="{{ @BASE }}/goles" class="{{ @page=='goles' ? 'activa' : '' }}">Goles</a>
+                        <a href="{{ @BASE }}/incidencias" class="{{ @page=='incidencias' ? 'activa' : '' }}">Incidencias</a>
+                    </div>
+                </div>
+                <div class="nav-grupo">
+                    <span class="nav-label">Reportes</span>
+                    <div class="nav-grupo-links">
+                        <a href="{{ @BASE }}/reportes/arbitro" class="{{ @page=='reporte-arbitro' ? 'activa' : '' }}">Árbitro</a>
+                        <a href="{{ @BASE }}/reportes/incidencias" class="{{ @page=='reporte-incidencias' ? 'activa' : '' }}">Incidencias</a>
+                        <a href="{{ @BASE }}/reportes/goleadores" class="{{ @page=='reporte-goleadores' ? 'activa' : '' }}">Goleadores</a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="main">
+            <header class="topbar">
+                <p class="kicker">
+                    <check if="{{ @page=='equipos' || @page=='jornadas' }}">Catálogo</check>
+                    <check if="{{ @page=='jugadores' || @page=='ficha' }}">Plantel</check>
+                    <check if="{{ @page=='goles' || @page=='incidencias' }}">Registro</check>
+                    <check if="{{ @page=='reporte-arbitro' || @page=='reporte-incidencias' || @page=='reporte-goleadores' }}">Reportes</check>
+                </p>
+                <h1>{{ @title }}</h1>
+            </header>
+            <main class="content">
+                <check if="{{ @DB_ERROR }}">
+                    <p class="aviso aviso-error">No hay conexión a la base de datos: {{ @DB_ERROR }}</p>
+                </check>

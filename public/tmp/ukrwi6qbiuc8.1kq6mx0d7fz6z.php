@@ -1,0 +1,36 @@
+<?php echo $this->render('partials/cabecera.html',NULL,get_defined_vars(),0); ?>
+
+<section class="grid-2">
+    <form class="panel" id="form-jornada">
+        <h2 id="titulo-form-jornada">Nueva jornada</h2>
+        <p class="ayuda">Los campos con * son obligatorios.</p>
+        <input type="hidden" name="id" id="jornada-id">
+        <label for="JOR_Numero">Número de jornada</label>
+        <input id="JOR_Numero" name="JOR_Numero" type="number" min="1" max="99" required>
+        <label for="JOR_Fecha_Juego">Fecha de juego</label>
+        <input id="JOR_Fecha_Juego" name="JOR_Fecha_Juego" type="date" required>
+        <div class="acciones">
+            <button type="submit">Guardar</button>
+            <button type="button" class="secundario" id="cancelar-jornada" hidden>Cancelar</button>
+        </div>
+        <p class="aviso" id="msg-jornada" hidden></p>
+    </form>
+
+    <section class="panel">
+        <h2>Calendario del torneo</h2>
+        <div class="tabla-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jornada</th>
+                        <th>Fecha</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-jornadas"></tbody>
+            </table>
+        </div>
+    </section>
+</section>
+
+<?php echo $this->render('partials/pie.html',NULL,get_defined_vars(),0); ?>

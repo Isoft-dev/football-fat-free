@@ -1,0 +1,112 @@
+CREATE DATABASE IF NOT EXISTS tor_futbol_infantil
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE tor_futbol_infantil;
+
+CREATE TABLE TOR_EQUIPO (
+    EQU_Equipo INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    EQU_Nombre VARCHAR(80) NOT NULL,
+    CONSTRAINT PK_EQUIPO
+        PRIMARY KEY (EQU_Equipo),
+    CONSTRAINT UQ_EQUIPO_NOMBRE
+        UNIQUE (EQU_Nombre)
+);
+
+CREATE TABLE TOR_JORNADA (
+    JOR_Jornada INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    JOR_Numero TINYINT UNSIGNED NOT NULL,
+    JOR_Fecha_Juego DATE NOT NULL,
+    CONSTRAINT PK_JORNADA
+        PRIMARY KEY (JOR_Jornada),
+    CONSTRAINT UQ_JORNADA_NUMERO
+        UNIQUE (JOR_Numero),
+    CONSTRAINT UQ_JORNADA_FECHA
+        UNIQUE (JOR_Fecha_Juego),
+    CONSTRAINT CK_JORNADA_NUMERO
+        CHECK (JOR_Numero >= 1)
+);
+
+CREATE TABLE TOR_TIPO_TARJETA (
+    TTA_Tipo_Tarjeta INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    TTA_Codigo VARCHAR(10) NOT NULL,
+    TTA_Nombre VARCHAR(30) NOT NULL,
+    CONSTRAINT PK_TIPO_TARJETA
+        PRIMARY KEY (TTA_Tipo_Tarjeta),
+    CONSTRAINT UQ_TIPO_TARJETA_CODIGO
+        UNIQUE (TTA_Codigo)
+);
+
+INSERT INTO TOR_TIPO_TARJETA (TTA_Codigo, TTA_Nombre) VALUES
+    ('amarilla', 'Tarjeta amarilla'),
+    ('roja', 'Tarjeta roja');
+
+CREATE TABLE TOR_JUGADOR (
+    JUG_Jugador INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    EQU_Equipo INT UNSIGNED NOT NULL,
+    JUG_Primer_Nombre VARCHAR(60) NOT NULL,
+    JUG_Segundo_Nombre VARCHAR(60) NULL,
+    JUG_Primer_Apellido VARCHAR(60) NOT NULL,
+    JUG_Segundo_Apellido VARCHAR(60) NULL,
+    JUG_Fecha_Nacimiento DATE NOT NULL,
+    JUG_Fotografia VARCHAR(255) NOT NULL,
+    JUG_Segundo_Nombre_Norm VARCHAR(60)
+        GENERATED ALWAYS AS (IFNULL(JUG_Segundo_Nombre, '')) STORED,
+    JUG_Segundo_Apellido_Norm VARCHAR(60)
+        GENERATED ALWAYS AS (IFNULL(JUG_Segundo_Apellido, '')) STORED,
+    CONSTRAINT PK_JUGADOR
+        PRIMARY KEY (JUG_Jugador),
+    CONSTRAINT FK_JUGADOR_EQUIPO
+        FOREIGN KEY (EQU_Equipo)
+        REFERENCES TOR_EQUIPO (EQU_Equipo),
+    CONSTRAINT UQ_JUGADOR_IDENTIDAD
+        UNIQUE (
+            EQU_Equipo,
+            JUG_Primer_Nombre,
+            JUG_Segundo_Nombre_Norm,
+            JUG_Primer_Apellido,
+            JUG_Segundo_Apellido_Norm,
+            JUG_Fecha_Nacimiento
+        )
+);
+
+CREATE TABLE TOR_GOL (
+    GOL_Gol INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    JUG_Jugador INT UNSIGNED NOT NULL,
+    JOR_Jornada INT UNSIGNED NOT NULL,
+    GOL_Cantidad TINYINT UNSIGNED NOT NULL,
+    CONSTRAINT PK_GOL
+        PRIMARY KEY (GOL_Gol),
+    CONSTRAINT UQ_GOL_JUGADOR_JORNADA
+        UNIQUE (JUG_Jugador, JOR_Jornada),
+    CONSTRAINT FK_GOL_JUGADOR
+        FOREIGN KEY (JUG_Jugador)
+        REFERENCES TOR_JUGADOR (JUG_Jugador),
+    CONSTRAINT FK_GOL_JORNADA
+        FOREIGN KEY (JOR_Jornada)
+        REFERENCES TOR_JORNADA (JOR_Jornada),
+    CONSTRAINT CK_GOL_CANTIDAD
+        CHECK (GOL_Cantidad > 0)
+);
+
+CREATE TABLE TOR_INCIDENCIA (
+    INC_Incidencia INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    JUG_Jugador INT UNSIGNED NOT NULL,
+    TTA_Tipo_Tarjeta INT UNSIGNED NOT NULL,
+    INC_Descripcion VARCHAR(255) NOT NULL,
+    INC_Fecha_Incidencia DATE NOT NULL,
+    INC_Fecha_Suspension DATE NULL,
+    CONSTRAINT PK_INCIDENCIA
+        PRIMARY KEY (INC_Incidencia),
+    CONSTRAINT FK_INCIDENCIA_JUGADOR
+        FOREIGN KEY (JUG_Jugador)
+        REFERENCES TOR_JUGADOR (JUG_Jugador),
+    CONSTRAINT FK_INCIDENCIA_TIPO_TARJETA
+        FOREIGN KEY (TTA_Tipo_Tarjeta)
+        REFERENCES TOR_TIPO_TARJETA (TTA_Tipo_Tarjeta),
+    CONSTRAINT CK_INCIDENCIA_SUSPENSION
+        CHECK (
+            INC_Fecha_Suspension IS NULL
+            OR INC_Fecha_Suspension >= INC_Fecha_Incidencia
+        )
+);

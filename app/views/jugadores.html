@@ -1,0 +1,48 @@
+<include href="partials/cabecera.html"/>
+
+<section class="grid-2">
+    <form class="panel" id="form-jugador" enctype="multipart/form-data">
+        <h2 id="titulo-form-jugador">Nuevo jugador</h2>
+        <p class="ayuda">Los campos con * son obligatorios. La fecha de nacimiento no puede ser posterior a hoy.</p>
+        <input type="hidden" name="id" id="jugador-id">
+        <label for="EQU_Equipo">Equipo</label>
+        <select id="EQU_Equipo" name="EQU_Equipo" required></select>
+        <label for="JUG_Primer_Nombre">Primer nombre</label>
+        <input id="JUG_Primer_Nombre" name="JUG_Primer_Nombre" type="text" maxlength="60" required>
+        <label for="JUG_Segundo_Nombre">Segundo nombre</label>
+        <input id="JUG_Segundo_Nombre" name="JUG_Segundo_Nombre" type="text" maxlength="60">
+        <label for="JUG_Primer_Apellido">Primer apellido</label>
+        <input id="JUG_Primer_Apellido" name="JUG_Primer_Apellido" type="text" maxlength="60" required>
+        <label for="JUG_Segundo_Apellido">Segundo apellido</label>
+        <input id="JUG_Segundo_Apellido" name="JUG_Segundo_Apellido" type="text" maxlength="60">
+        <label for="JUG_Fecha_Nacimiento">Fecha de nacimiento</label>
+        <input id="JUG_Fecha_Nacimiento" name="JUG_Fecha_Nacimiento" type="date" required>
+        <label for="fotografia">Fotografía <span id="foto-ayuda">(obligatoria en el alta)</span></label>
+        <input id="fotografia" name="fotografia" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <div class="acciones">
+            <button type="submit">Guardar</button>
+            <button type="button" class="secundario" id="cancelar-jugador" hidden>Cancelar</button>
+        </div>
+        <p class="aviso" id="msg-jugador" hidden></p>
+    </form>
+
+    <section class="panel">
+        <h2>Plantel</h2>
+        <div class="tabla-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Jugador</th>
+                        <th>Equipo</th>
+                        <th class="col-opcional">Nacimiento</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-jugadores"></tbody>
+            </table>
+        </div>
+    </section>
+</section>
+
+<include href="partials/pie.html"/>

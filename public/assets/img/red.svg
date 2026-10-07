@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g stroke="#111" stroke-opacity="0.09" stroke-width="1" fill="none">
+    <path d="M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
+    <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120"/>
+    <path d="M0 0 120 120M120 0 0 120"/>
+  </g>
+</svg>
