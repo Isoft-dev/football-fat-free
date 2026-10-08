@@ -4,6 +4,7 @@
 /.vscode/
 *.log
 /storage/*.sqlite
+/public/tmp/
 /public/uploads/jugadores/*
 !/public/uploads/jugadores/.gitkeep
 docs/*

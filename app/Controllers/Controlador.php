@@ -86,9 +86,10 @@ abstract class Controlador
         ], static fn ($parte) => $parte !== null && $parte !== '')));
     }
 
+    // Color de cada pantalla (menú activo y borde del formulario).
     private const ACENTOS = [
         'inicio' => '#ffd200',
-        'equipos' => '#ffd200',
+        'equipos' => '#1b6b43',
         'jornadas' => '#7dd3fc',
         'jugadores' => '#86efac',
         'ficha' => '#86efac',

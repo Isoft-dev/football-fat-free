@@ -442,7 +442,7 @@ async function iniciarFicha() {
         <section class="panel ficha">
             <img class="foto-lg" src="${esc(fotoUrl(jugador.JUG_Fotografia))}" alt="">
             <div>
-                <p class="kicker">Plantel</p>
+                <p class="kicker">Jugadores</p>
                 <h2>${esc(jugador.JUG_Nombre_Completo)}</h2>
                 <p>Equipo: ${esc(jugador.EQU_Nombre)}</p>
                 <p>Nacimiento: ${esc(jugador.JUG_Fecha_Nacimiento_Vista)}</p>

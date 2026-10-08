@@ -1,61 +1,31 @@
+/* Colores. Cámbielos aquí y se usan en toda la app. */
 :root {
     color-scheme: light;
-    --ink: #14110d;
+    --ink: #14110d;              /* negro: texto y bordes */
     --navy: #10231c;
-    --amarillo: #ffd200;
+    --amarillo: #ffd200;         /* marca: fondo izquierdo y barra superior */
     --amarillo-bajo: #f4c400;
-    --cesped: #1b6b43;
+    --cesped: #1b6b43;           /* verde: acento de Equipos y detalles */
     --cesped-suave: #e7f4ec;
-    --papel: #fffdf8;
+    --papel: #fffdf8;            /* fondo de paneles */
     --papel-calido: #f6efe2;
     --fondo: #efe7d4;
+    --pagina-derecha: #f3eee4;   /* mitad derecha del fondo (fuera de la tarjeta) */
     --tinta: #14110d;
-    --muted: #5c574e;
-    --linea: #e4d8c4;
+    --muted: #5c574e;            /* textos secundarios */
+    --linea: #e4d8c4;            /* bordes de tabla */
     --linea-cal: #f3ead9;
-    --peligro: #c1121f;
-    --amarilla: #8a6400;
+    --peligro: #c1121f;          /* errores y tarjeta roja */
+    --amarilla: #8a6400;         /* texto de tarjeta amarilla */
     --ok: #1b6b43;
     --sombra: 0 18px 28px rgba(20, 17, 13, 0.12), 0 42px 80px rgba(20, 17, 13, 0.18);
     --sombra-panel: 8px 8px 0 rgba(20, 17, 13, 0.92);
+    /* --acento-form lo pone PHP (Controlador.php) según la pantalla */
 }
 
+/* Evita el destello al cambiar de página. */
 @view-transition {
     navigation: none;
-}
-
-html[data-page="inicio"],
-html[data-page="equipos"] {
-    --acento-form: #ffd200;
-}
-
-html[data-page="jornadas"] {
-    --acento-form: #7dd3fc;
-}
-
-html[data-page="jugadores"],
-html[data-page="ficha"] {
-    --acento-form: #86efac;
-}
-
-html[data-page="goles"] {
-    --acento-form: #ffb020;
-}
-
-html[data-page="incidencias"] {
-    --acento-form: #fb7185;
-}
-
-html[data-page="reporte-arbitro"] {
-    --acento-form: #a5b4fc;
-}
-
-html[data-page="reporte-incidencias"] {
-    --acento-form: #fda4af;
-}
-
-html[data-page="reporte-goleadores"] {
-    --acento-form: #facc15;
 }
 
 * {
@@ -76,20 +46,23 @@ body,
     transition: none;
 }
 
+/* Página: amarillo a la izquierda, beige a la derecha. */
 body {
     position: relative;
     margin: 0;
     min-height: 100vh;
     color: var(--tinta);
     background:
-        linear-gradient(90deg, var(--amarillo) 0 44%, #f3eee4 44%);
+        linear-gradient(90deg, var(--amarillo) 0 44%, var(--pagina-derecha) 44%);
     font-family: Outfit, "Segoe UI", sans-serif;
     line-height: 1.5;
 }
 
+/* --- Adorno del fondo (no se puede hacer clic) --- */
+
 .fondo-escena,
 .grano,
-body::before {
+.numero-fondo {
     pointer-events: none;
 }
 
@@ -118,12 +91,13 @@ body::before {
     mix-blend-mode: multiply;
 }
 
-body::before {
-    content: "5";
+/* Cifra gigante del fondo. El número sale de index.php ($dorsal). */
+.numero-fondo {
     position: fixed;
     top: 7vh;
     left: 1.4vw;
     z-index: 0;
+    margin: 0;
     color: rgba(20, 17, 13, 0.08);
     font-family: Oswald, Impact, sans-serif;
     font-size: clamp(12rem, 38vw, 28rem);
@@ -134,6 +108,8 @@ body::before {
 a {
     color: var(--ink);
 }
+
+/* --- Tarjeta blanca de la aplicación --- */
 
 .escena {
     position: relative;
@@ -153,12 +129,13 @@ a {
     box-shadow: var(--sombra);
 }
 
-.app::before {
-    content: "";
-    display: block;
+/* Franja de 8px arriba de la tarjeta. */
+.barra-superior {
     height: 8px;
-    background: linear-gradient(90deg, var(--ink) 0 16%, var(--amarillo) 16% 70%, var(--cesped) 70%);
+    background: var(--amarillo);
 }
+
+/* --- Encabezado: logo y menú --- */
 
 .masthead {
     display: flex;
@@ -181,6 +158,10 @@ a {
     text-decoration: none;
 }
 
+.marca:hover .brand {
+    box-shadow: inset 0 -3px 0 var(--amarillo);
+}
+
 .logo-marca {
     display: grid;
     place-items: center;
@@ -196,6 +177,7 @@ a {
     letter-spacing: 0.04em;
 }
 
+/* Etiquetas chicas en mayúsculas (menú, paneles, pie). */
 .brand-kicker,
 .kicker,
 .nav-label,
@@ -262,6 +244,8 @@ a {
     box-shadow: inset 0 -3px 0 var(--acento-form);
 }
 
+/* --- Cuerpo de cada pantalla --- */
+
 .topbar,
 .content {
     width: min(1040px, calc(100% - 2.6rem));
@@ -287,6 +271,7 @@ a {
     text-shadow: 3px 3px 0 color-mix(in srgb, var(--acento-form) 48%, transparent);
 }
 
+/* En inicio el título grande vive en .hero, no en .topbar. */
 body[data-page="inicio"] .topbar {
     display: none;
 }
@@ -309,26 +294,24 @@ body[data-page="inicio"] .topbar {
     font-size: 1.02rem;
 }
 
+/* --- Portada (inicio) --- */
+
 .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
-    gap: 1.5rem;
-    align-items: center;
-    margin: 0.4rem 0 1.6rem;
-    min-height: 22rem;
+    margin: 1.1rem 0 1.6rem;
 }
 
 .hero-kicker {
+    margin: 0 0 0.85rem;
     color: var(--cesped);
 }
 
 .hero-titulo {
-    margin: 0.15rem 0 0;
+    margin: 0;
     font-family: Oswald, Impact, sans-serif;
-    font-size: clamp(4.4rem, 12vw, 8.2rem);
+    font-size: clamp(3.6rem, 10vw, 6.4rem);
     font-weight: 700;
-    letter-spacing: -0.045em;
-    line-height: 0.82;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
     text-transform: uppercase;
     text-shadow: 6px 6px 0 rgba(255, 210, 0, 0.55);
 }
@@ -349,49 +332,7 @@ body[data-page="inicio"] .topbar {
     margin-top: 1.35rem;
 }
 
-.hero-visual {
-    position: relative;
-    display: grid;
-    place-items: end center;
-    min-height: 22rem;
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.45), transparent 28%),
-        linear-gradient(160deg, var(--amarillo), var(--amarillo-bajo) 55%, #1b6b43 140%),
-        url("../img/red.svg");
-    background-size: auto, auto, 90px 90px;
-    border: 2px solid var(--ink);
-    border-radius: 0 0 0 7rem;
-    box-shadow: var(--sombra-panel);
-}
-
-.hero-luz {
-    position: absolute;
-    inset: auto -10% 18% 35%;
-    height: 8rem;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 68%);
-}
-
-.hero-marca {
-    position: absolute;
-    top: 1rem;
-    right: 1.1rem;
-    font-family: Oswald, Impact, sans-serif;
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.45);
-}
-
-.hero-jugador {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 18rem);
-    height: auto;
-    margin-bottom: -0.4rem;
-    filter: drop-shadow(8px 14px 0 rgba(20, 17, 13, 0.18));
-}
-
+/* Conteos de equipos, jornadas, jugadores, goles y tarjetas. */
 .marcador {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -424,6 +365,8 @@ body[data-page="inicio"] .topbar {
     color: #d3c7ae;
 }
 
+/* --- Cajas de formulario y listados --- */
+
 .panel {
     padding: 1.2rem 1.25rem 1.3rem;
     background: color-mix(in srgb, var(--acento-form) 14%, var(--papel));
@@ -448,6 +391,7 @@ form.panel,
     color: var(--muted);
 }
 
+/* Formulario a la izquierda, tabla a la derecha. */
 .grid-2 {
     display: grid;
     grid-template-columns: minmax(16rem, 22rem) 1fr;
@@ -461,6 +405,8 @@ form.panel,
         top: 1rem;
     }
 }
+
+/* --- Formularios --- */
 
 label {
     display: block;
@@ -522,6 +468,7 @@ textarea {
     display: none !important;
 }
 
+/* Botón negro principal. .boton es el mismo estilo en enlaces <a>. */
 button,
 .boton {
     display: inline-flex;
@@ -586,6 +533,8 @@ button:disabled {
     box-shadow: 2px 2px 0 var(--ink);
 }
 
+/* --- Buscador y paginación de tablas --- */
+
 .lista-barra {
     display: flex;
     flex-wrap: wrap;
@@ -623,6 +572,8 @@ button:disabled {
     gap: 0.45rem;
     align-items: center;
 }
+
+/* --- Tablas --- */
 
 .tabla-wrap {
     max-height: min(28rem, 58vh);
@@ -669,6 +620,8 @@ th {
     text-transform: uppercase;
 }
 
+/* --- Fotos de jugadores --- */
+
 .foto,
 .foto-lg {
     display: block;
@@ -693,6 +646,7 @@ th {
     box-shadow: 0 0 0 3px var(--ink), 8px 10px 0 var(--amarillo);
 }
 
+/* Etiquetas de tarjeta (roja / amarilla) y “sí suspendido”. */
 .badge {
     display: inline-block;
     padding: 0.16rem 0.55rem;
@@ -722,6 +676,7 @@ th {
     border-color: #b7d8c5;
 }
 
+/* Asterisco rojo en campos obligatorios. */
 label:has(+ :required)::after {
     content: " *";
     color: var(--peligro);
@@ -730,6 +685,8 @@ label:has(+ :required)::after {
 .aviso {
     margin-top: 0.8rem;
 }
+
+/* --- Mensajes flotantes (éxito / error) --- */
 
 .alertas {
     position: fixed;
@@ -770,6 +727,7 @@ label:has(+ :required)::after {
     box-shadow: 2px 2px 0 var(--ink);
 }
 
+/* Diálogo “¿Eliminar?” */
 .confirmacion {
     position: fixed;
     inset: 0;
@@ -806,6 +764,7 @@ label:has(+ :required)::after {
     color: var(--ok);
 }
 
+/* Lista numerada de la portada (“Cómo se arma el torneo”). */
 .pasos {
     margin: 0;
     padding-left: 0;
@@ -836,6 +795,7 @@ label:has(+ :required)::after {
     letter-spacing: 0.04em;
 }
 
+/* Ficha de un jugador (foto + datos). */
 .ficha {
     display: grid;
     grid-template-columns: 8.5rem 1fr;
@@ -856,6 +816,7 @@ label:has(+ :required)::after {
     margin: 0.2rem 0;
 }
 
+/* Bloques por equipo en el reporte del árbitro. */
 .grupo-equipo {
     margin-top: 1.4rem;
 }
@@ -867,6 +828,7 @@ label:has(+ :required)::after {
     text-transform: uppercase;
 }
 
+/* Posición y total en el reporte de goleadores. */
 .puesto {
     width: 2.4rem;
     color: var(--ink);
@@ -892,6 +854,8 @@ body[data-page="reporte-goleadores"] #tabla-goleadores tr.lider .num-goles {
     border-top: 1px solid rgba(20, 17, 13, 0.08);
 }
 
+/* --- Celular / tablet --- */
+
 @media (max-width: 860px) {
     body {
         background: var(--amarillo);
@@ -903,19 +867,8 @@ body[data-page="reporte-goleadores"] #tabla-goleadores tr.lider .num-goles {
     }
 
     .grid-2,
-    .ficha,
-    .hero {
+    .ficha {
         grid-template-columns: 1fr;
-    }
-
-    .hero {
-        min-height: 0;
-    }
-
-    .hero-visual {
-        min-height: 16rem;
-        order: -1;
-        border-radius: 0 0 4rem 0;
     }
 
     .marcador {
@@ -961,11 +914,11 @@ body[data-page="reporte-goleadores"] #tabla-goleadores tr.lider .num-goles {
     }
 
     .panel,
-    .hero-visual,
     .marcador-celda {
         box-shadow: 5px 5px 0 var(--ink);
     }
 
+    /* Columnas que se ocultan en pantallas chicas (nacimiento, etc.). */
     .col-opcional {
         display: none;
     }

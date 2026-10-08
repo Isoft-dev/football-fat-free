@@ -11,7 +11,7 @@
         @view-transition { navigation: none; }
         html, body, .main, .panel, .topbar, .tabla-wrap thead th { transition: none !important; }
     </style>
-    <link rel="stylesheet" href="{{ @BASE }}/assets/css/app.css?v=5">
+    <link rel="stylesheet" href="{{ @BASE }}/assets/css/app.css?v=9">
 </head>
 <body data-page="{{ @page }}">
     <div id="alertas" class="alertas" aria-live="polite"></div>
@@ -26,17 +26,25 @@
     </div>
     <div class="fondo-escena" aria-hidden="true"></div>
     <div class="grano" aria-hidden="true"></div>
+    <p class="numero-fondo" aria-hidden="true">{{ @dorsal }}</p>
     <div class="escena">
     <div class="app">
+        <div class="barra-superior" aria-hidden="true"></div>
         <header class="masthead">
             <a class="marca" href="{{ @BASE }}/">
-                <span class="logo-marca" aria-hidden="true">07</span>
+                <span class="logo-marca" aria-hidden="true">{{ @dorsal }}</span>
                 <div>
                     <p class="brand-kicker">Torneo infantil</p>
                     <p class="brand">Fútbol</p>
                 </div>
             </a>
             <nav class="nav-principal" aria-label="Principal">
+                <div class="nav-grupo">
+                    <span class="nav-label">Torneo</span>
+                    <div class="nav-grupo-links">
+                        <a href="{{ @BASE }}/" class="{{ @page=='inicio' ? 'activa' : '' }}">Inicio</a>
+                    </div>
+                </div>
                 <div class="nav-grupo">
                     <span class="nav-label">Catálogos</span>
                     <div class="nav-grupo-links">
@@ -65,8 +73,9 @@
         <div class="main">
             <header class="topbar">
                 <p class="kicker">
+                    <check if="{{ @page=='inicio' }}">Torneo</check>
                     <check if="{{ @page=='equipos' || @page=='jornadas' }}">Catálogo</check>
-                    <check if="{{ @page=='jugadores' || @page=='ficha' }}">Plantel</check>
+                    <check if="{{ @page=='jugadores' || @page=='ficha' }}">Jugadores</check>
                     <check if="{{ @page=='goles' || @page=='incidencias' }}">Registro</check>
                     <check if="{{ @page=='reporte-arbitro' || @page=='reporte-incidencias' || @page=='reporte-goleadores' }}">Reportes</check>
                 </p>

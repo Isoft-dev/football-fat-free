@@ -9,6 +9,8 @@ $f3 = Base::instance();
 $f3->set('DEBUG', 0);
 $f3->set('UI', dirname(__DIR__) . '/app/views/');
 $f3->set('DB_ERROR', '');
+// Número de adorno: logo y cifra del fondo amarillo.
+$f3->set('dorsal', '7');
 
 $script = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
 if (str_ends_with(strtolower($script), '/index.php')) {
