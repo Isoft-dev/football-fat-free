@@ -6,7 +6,7 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 $f3 = Base::instance();
 
-$f3->set('DEBUG', 3);
+$f3->set('DEBUG', 0);
 $f3->set('UI', dirname(__DIR__) . '/app/views/');
 $f3->set('DB_ERROR', '');
 

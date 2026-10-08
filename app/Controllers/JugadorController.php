@@ -141,8 +141,11 @@ final class JugadorController extends Controlador
 
     public function crear(Base $f3): void
     {
+        $fotoNueva = '';
+
         try {
             $datos = $this->datosJugador($f3, true);
+            $fotoNueva = (string) $datos['JUG_Fotografia'];
             $this->evitarDuplicado($f3, $datos, null);
 
             $this->db($f3)->exec(
@@ -168,14 +171,18 @@ final class JugadorController extends Controlador
 
             $this->json(['mensaje' => 'Jugador registrado.'], 201);
         } catch (InvalidArgumentException | RuntimeException $error) {
+            $this->descartarFotoNueva($fotoNueva);
             $this->error($error->getMessage());
         } catch (Throwable $error) {
+            $this->descartarFotoNueva($fotoNueva);
             $this->error($this->mensajeDuplicado($error), 409);
         }
     }
 
     public function actualizar(Base $f3): void
     {
+        $fotoNueva = '';
+
         try {
             $id = $this->entero($f3->get('PARAMS.id'), 'jugador');
             $actual = $this->obtenerJugador($f3, $id);
@@ -186,11 +193,17 @@ final class JugadorController extends Controlador
             }
 
             $datos = $this->datosJugador($f3, false);
-            $this->evitarDuplicado($f3, $datos, $id);
+            $fotoNueva = (string) $datos['JUG_Fotografia'];
 
-            if ($datos['JUG_Fotografia'] !== '') {
-                FotoJugador::eliminarSiEsPropia((string) $actual['JUG_Fotografia']);
-            } else {
+            try {
+                $this->evitarDuplicado($f3, $datos, $id);
+            } catch (Throwable $error) {
+                $this->descartarFotoNueva($fotoNueva);
+                $fotoNueva = '';
+                throw $error;
+            }
+
+            if ($fotoNueva === '') {
                 $datos['JUG_Fotografia'] = (string) $actual['JUG_Fotografia'];
             }
 
@@ -216,10 +229,17 @@ final class JugadorController extends Controlador
                 ]
             );
 
+            if ($fotoNueva !== '') {
+                FotoJugador::eliminarSiEsPropia((string) $actual['JUG_Fotografia']);
+            }
+
+            $fotoNueva = '';
             $this->json(['mensaje' => 'Jugador actualizado.']);
         } catch (InvalidArgumentException | RuntimeException $error) {
+            $this->descartarFotoNueva($fotoNueva);
             $this->error($error->getMessage());
         } catch (Throwable $error) {
+            $this->descartarFotoNueva($fotoNueva);
             $this->error($this->mensajeDuplicado($error), 409);
         }
     }
@@ -286,6 +306,18 @@ final class JugadorController extends Controlador
             throw new InvalidArgumentException('El equipo no existe.');
         }
 
+        $datos = [
+            'EQU_Equipo' => $equipo,
+            'JUG_Primer_Nombre' => $this->texto($f3->get('POST.JUG_Primer_Nombre'), 'primer nombre', 60),
+            'JUG_Segundo_Nombre' => $this->texto($f3->get('POST.JUG_Segundo_Nombre'), 'segundo nombre', 60, false) ?: null,
+            'JUG_Primer_Apellido' => $this->texto($f3->get('POST.JUG_Primer_Apellido'), 'primer apellido', 60),
+            'JUG_Segundo_Apellido' => $this->texto($f3->get('POST.JUG_Segundo_Apellido'), 'segundo apellido', 60, false) ?: null,
+            'JUG_Fecha_Nacimiento' => Fecha::noFutura(
+                Fecha::aIso((string) $f3->get('POST.JUG_Fecha_Nacimiento')),
+                'fecha de nacimiento'
+            ),
+        ];
+
         $foto = '';
         $archivo = $f3->get('FILES.fotografia');
 
@@ -299,18 +331,16 @@ final class JugadorController extends Controlador
             throw new RuntimeException('La fotografía es obligatoria.');
         }
 
-        return [
-            'EQU_Equipo' => $equipo,
-            'JUG_Primer_Nombre' => $this->texto($f3->get('POST.JUG_Primer_Nombre'), 'primer nombre', 60),
-            'JUG_Segundo_Nombre' => $this->texto($f3->get('POST.JUG_Segundo_Nombre'), 'segundo nombre', 60, false) ?: null,
-            'JUG_Primer_Apellido' => $this->texto($f3->get('POST.JUG_Primer_Apellido'), 'primer apellido', 60),
-            'JUG_Segundo_Apellido' => $this->texto($f3->get('POST.JUG_Segundo_Apellido'), 'segundo apellido', 60, false) ?: null,
-            'JUG_Fecha_Nacimiento' => Fecha::noFutura(
-                Fecha::aIso((string) $f3->get('POST.JUG_Fecha_Nacimiento')),
-                'fecha de nacimiento'
-            ),
-            'JUG_Fotografia' => $foto,
-        ];
+        $datos['JUG_Fotografia'] = $foto;
+
+        return $datos;
+    }
+
+    private function descartarFotoNueva(string $ruta): void
+    {
+        if ($ruta !== '') {
+            FotoJugador::eliminarSiEsPropia($ruta);
+        }
     }
 
     private function evitarDuplicado(Base $f3, array $datos, ?int $excepto): void

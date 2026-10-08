@@ -7,7 +7,7 @@ import {
     fotoUrl,
     llenarSelect,
     mostrarAviso,
-} from './api.js?v=5';
+} from './api.js?v=6';
 
 const pagina = document.body.dataset.page;
 const POR_PAGINA = 8;

@@ -14,7 +14,7 @@ Abrir `http://localhost:8000`.
 
 También puede ejecutarse con Apache de XAMPP desde:
 
-`http://localhost/web/fatfree-app/public/`
+`http://localhost/fatfree-app/public/`
 
 ## Base de datos
 

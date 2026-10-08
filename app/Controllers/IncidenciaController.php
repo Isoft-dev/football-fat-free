@@ -80,7 +80,15 @@ final class IncidenciaController extends Controlador
 
             // Amarilla no lleva suspensión; roja exige fecha y no puede ser anterior a la incidencia.
             if ($tipo['TTA_Codigo'] === 'roja') {
-                $fechaSuspension = Fecha::aIso((string) ($cuerpo['INC_Fecha_Suspension'] ?? ''));
+                $suspension = trim((string) ($cuerpo['INC_Fecha_Suspension'] ?? ''));
+
+                if ($suspension === '') {
+                    throw new InvalidArgumentException(
+                        'La fecha de suspensión es obligatoria cuando la tarjeta es roja.'
+                    );
+                }
+
+                $fechaSuspension = Fecha::aIso($suspension);
 
                 if ($fechaSuspension < $fechaIncidencia) {
                     throw new InvalidArgumentException(

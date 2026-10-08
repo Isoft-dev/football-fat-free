@@ -53,11 +53,14 @@ export function mostrarToast(texto, tipo = 'ok') {
         return;
     }
 
+    caja.replaceChildren();
+
     const item = document.createElement('div');
     item.className = `alerta alerta-${tipo}`;
     item.innerHTML = `<p>${esc(texto)}</p><button type="button" class="alerta-cerrar" aria-label="Cerrar">Cerrar</button>`;
     item.querySelector('button').addEventListener('click', () => item.remove());
     caja.append(item);
+    window.setTimeout(() => item.remove(), 4000);
 }
 
 export function confirmar(mensaje) {
