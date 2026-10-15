@@ -6,7 +6,7 @@ namespace App\Services;
 
 final class Suspension
 {
-    // Roja: el jugador no juega si la fecha de la jornada cae entre la incidencia y la suspensión (inclusive).
+    /** Roja: no juega si la fecha de la jornada cae entre la incidencia y la suspensión (inclusive). */
     public static function estaSuspendido(
         string $fechaJuegoIso,
         array $incidencias

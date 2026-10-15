@@ -11,11 +11,13 @@ use Throwable;
 
 final class IncidenciaController extends Controlador
 {
+    /** Pinta la pantalla de tarjetas. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'incidencias.html', 'Incidencias', 'incidencias');
     }
 
+    /** Lista incidencias y el catálogo de tipos de tarjeta. */
     public function listar(Base $f3): void
     {
         $filas = $this->db($f3)->exec(
@@ -67,6 +69,7 @@ final class IncidenciaController extends Controlador
         ]);
     }
 
+    /** Registra una tarjeta. Roja exige fecha de suspensión. */
     public function crear(Base $f3): void
     {
         try {
@@ -128,6 +131,7 @@ final class IncidenciaController extends Controlador
         }
     }
 
+    /** Borra una incidencia. */
     public function eliminar(Base $f3): void
     {
         try {
@@ -149,6 +153,7 @@ final class IncidenciaController extends Controlador
         }
     }
 
+    /** Busca el tipo amarilla/roja en el catálogo. */
     private function tipoTarjeta(Base $f3, string $codigo): array
     {
         $codigo = strtolower($this->texto($codigo, 'tipo de tarjeta', 10));

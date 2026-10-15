@@ -1,3 +1,4 @@
+/** Carpeta pública de la app (/fatfree-app/public o vacío en el servidor embebido). */
 export function baseUrl() {
     const declarado = document.documentElement.dataset.base || '';
 
@@ -16,16 +17,19 @@ export function baseUrl() {
     return '';
 }
 
+/** Arma la URL completa de un endpoint (/api/equipos, etc.). */
 export function apiUrl(ruta) {
     const limpia = ruta.startsWith('/') ? ruta : `/${ruta}`;
 
     return `${baseUrl()}${limpia}`;
 }
 
+/** URL de una foto guardada en uploads/. */
 export function fotoUrl(ruta) {
     return `${baseUrl()}/${ruta}`;
 }
 
+/** Escapa HTML para no inyectar markup al pintar tablas. */
 export function esc(texto) {
     return String(texto ?? '')
         .replaceAll('&', '&amp;')
@@ -34,6 +38,7 @@ export function esc(texto) {
         .replaceAll('"', '&quot;');
 }
 
+/** Muestra un aviso junto al formulario y un toast arriba a la derecha. */
 export function mostrarAviso(elemento, texto, tipo = 'ok') {
     if (elemento) {
         elemento.hidden = !texto;
@@ -46,6 +51,7 @@ export function mostrarAviso(elemento, texto, tipo = 'ok') {
     }
 }
 
+/** Toast flotante de éxito o error. */
 export function mostrarToast(texto, tipo = 'ok') {
     const caja = document.querySelector('#alertas');
 
@@ -63,6 +69,7 @@ export function mostrarToast(texto, tipo = 'ok') {
     window.setTimeout(() => item.remove(), 4000);
 }
 
+/** Diálogo de confirmar (borrar). Devuelve una Promise true/false. */
 export function confirmar(mensaje) {
     const fondo = document.querySelector('#confirmacion');
     const texto = document.querySelector('#confirmacion-texto');
@@ -99,7 +106,18 @@ export function confirmar(mensaje) {
     });
 }
 
+/** Token CSRF que pintó PHP en el <meta>. */
+function csrfToken() {
+    return document.querySelector('meta[name="csrf"]')?.getAttribute('content') || '';
+}
+
+/** Lee JSON; si la sesión caducó, manda al login. */
 async function leerJson(respuesta) {
+    if (respuesta.status === 401) {
+        window.location.href = `${baseUrl()}/login`;
+        throw new Error('Debe iniciar sesión.');
+    }
+
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
@@ -109,25 +127,38 @@ async function leerJson(respuesta) {
     return datos;
 }
 
+/** GET a la API. */
 export async function apiGet(ruta) {
-    return leerJson(await fetch(apiUrl(ruta), { cache: 'no-store' }));
+    return leerJson(await fetch(apiUrl(ruta), {
+        cache: 'no-store',
+        credentials: 'same-origin',
+    }));
 }
 
+/** POST JSON a la API (lleva CSRF). */
 export async function apiPost(ruta, cuerpo) {
     return leerJson(await fetch(apiUrl(ruta), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken(),
+        },
         body: JSON.stringify(cuerpo),
     }));
 }
 
+/** POST de formulario (alta de jugador con foto). */
 export async function apiForm(ruta, formulario) {
     return leerJson(await fetch(apiUrl(ruta), {
         method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'X-CSRF-Token': csrfToken() },
         body: formulario,
     }));
 }
 
+/** Llena un <select> con filas de la API. */
 export function llenarSelect(select, filas, valor, etiqueta, vacio = '') {
     const actual = select.value;
     select.innerHTML = vacio ? `<option value="">${esc(vacio)}</option>` : '';

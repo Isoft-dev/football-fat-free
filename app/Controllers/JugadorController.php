@@ -14,11 +14,13 @@ use Throwable;
 
 final class JugadorController extends Controlador
 {
+    /** Pinta el listado y el formulario de jugadores. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'jugadores.html', 'Jugadores', 'jugadores');
     }
 
+    /** Pinta la ficha HTML de un jugador. */
     public function ficha(Base $f3): void
     {
         $id = (string) $f3->get('PARAMS.id');
@@ -27,6 +29,7 @@ final class JugadorController extends Controlador
         ]);
     }
 
+    /** Lista jugadores con equipo, foto y fecha de nacimiento. */
     public function listar(Base $f3): void
     {
         $filas = $this->db($f3)->exec(
@@ -55,6 +58,7 @@ final class JugadorController extends Controlador
         $this->json(['jugadores' => $filas]);
     }
 
+    /** Devuelve un jugador, sus goles e incidencias (y si está suspendido en una jornada). */
     public function ver(Base $f3): void
     {
         try {
@@ -139,6 +143,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Da de alta un jugador con fotografía. */
     public function crear(Base $f3): void
     {
         $fotoNueva = '';
@@ -179,6 +184,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Edita un jugador. La foto nueva es opcional. */
     public function actualizar(Base $f3): void
     {
         $fotoNueva = '';
@@ -244,6 +250,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Borra un jugador si no tiene goles ni incidencias. */
     public function eliminar(Base $f3): void
     {
         try {
@@ -290,6 +297,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Lee y valida el formulario de jugador (nombres, equipo, fecha, foto). */
     private function datosJugador(Base $f3, bool $fotoObligatoria): array
     {
         $equipo = $this->entero($f3->get('POST.EQU_Equipo'), 'equipo');
@@ -336,6 +344,7 @@ final class JugadorController extends Controlador
         return $datos;
     }
 
+    /** Si el alta falla, borra la foto que acaba de subirse. */
     private function descartarFotoNueva(string $ruta): void
     {
         if ($ruta !== '') {
@@ -343,6 +352,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Impide dos jugadores iguales (nombre + nacimiento + equipo). */
     private function evitarDuplicado(Base $f3, array $datos, ?int $excepto): void
     {
         $sql = 'SELECT JUG_Jugador
@@ -389,6 +399,7 @@ final class JugadorController extends Controlador
         }
     }
 
+    /** Trae un jugador por id, o null si no existe. */
     private function obtenerJugador(Base $f3, int $id): ?array
     {
         $filas = $this->db($f3)->exec(
@@ -420,6 +431,7 @@ final class JugadorController extends Controlador
         return $jugador;
     }
 
+    /** Traduce unique de identidad a un mensaje claro. */
     private function mensajeDuplicado(Throwable $error): string
     {
         $texto = $error->getMessage();

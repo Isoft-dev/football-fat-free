@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Arranque de Fat-Free: conexión, sesión y mapa de rutas HTML + API.
+
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $f3 = Base::instance();
@@ -23,6 +25,13 @@ try {
 } catch (Throwable $error) {
     $f3->set('DB_ERROR', $error->getMessage());
 }
+
+App\Services\Sesion::configurar($f3);
+
+// Entrar y salir: las únicas rutas sin sesión previa.
+$f3->route('GET /login', 'App\Controllers\SesionController->formulario');
+$f3->route('POST /login', 'App\Controllers\SesionController->entrar');
+$f3->route('POST /salir', 'App\Controllers\SesionController->salir');
 
 // Páginas HTML que pinta Fat-Free.
 $f3->route('GET /', 'App\Controllers\HomeController->index');

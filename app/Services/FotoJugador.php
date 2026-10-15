@@ -16,6 +16,7 @@ final class FotoJugador
         'image/webp' => 'webp',
     ];
 
+    /** Guarda una foto de jugador (JPG/PNG/WEBP, máx. 2 MB) y devuelve su ruta. */
     public static function guardar(array $archivo): string
     {
         $error = (int) ($archivo['error'] ?? UPLOAD_ERR_NO_FILE);
@@ -62,6 +63,7 @@ final class FotoJugador
         return 'uploads/jugadores/' . $nombre;
     }
 
+    /** Borra una foto solo si está en uploads/jugadores (no toca otras rutas). */
     public static function eliminarSiEsPropia(string $ruta): void
     {
         if (!str_starts_with($ruta, 'uploads/jugadores/')) {

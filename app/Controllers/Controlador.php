@@ -5,12 +5,22 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Services\RespuestaJson;
+use App\Services\Sesion;
 use Base;
 use DB\SQL;
 use InvalidArgumentException;
 
 abstract class Controlador
 {
+    /** Antes de cada acción: arranca la sesión, exige login y valida CSRF en POST. */
+    public function beforeroute(Base $f3): void
+    {
+        Sesion::configurar($f3);
+        Sesion::exigir($f3);
+        Sesion::exigirCsrf($f3);
+    }
+
+    /** Devuelve la conexión MySQL/SQLite o lanza error si no hay base. */
     protected function db(Base $f3): SQL
     {
         if (!$f3->exists('DB')) {
@@ -22,16 +32,19 @@ abstract class Controlador
         return $f3->get('DB');
     }
 
+    /** Responde JSON al navegador. */
     protected function json(array $datos, int $codigo = 200): void
     {
         RespuestaJson::enviar($datos, $codigo);
     }
 
+    /** Responde un error JSON (mensaje + código HTTP). */
     protected function error(string $mensaje, int $codigo = 400): void
     {
         RespuestaJson::error($mensaje, $codigo);
     }
 
+    /** Lee el cuerpo de la petición (JSON o POST). */
     protected function cuerpo(Base $f3): array
     {
         $crudo = (string) $f3->get('BODY');
@@ -46,6 +59,7 @@ abstract class Controlador
         return is_array($post) ? $post : [];
     }
 
+    /** Valida un entero positivo; si no sirve, lanza excepción. */
     protected function entero(mixed $valor, string $campo): int
     {
         $entero = filter_var($valor, FILTER_VALIDATE_INT);
@@ -57,6 +71,7 @@ abstract class Controlador
         return $entero;
     }
 
+    /** Valida texto recortado y con largo máximo. */
     protected function texto(mixed $valor, string $campo, int $maximo, bool $obligatorio = true): string
     {
         $texto = trim((string) $valor);
@@ -76,6 +91,7 @@ abstract class Controlador
         return $texto;
     }
 
+    /** Junta los cuatro campos de nombre de un jugador. */
     protected function nombreCompleto(array $fila): string
     {
         return trim(implode(' ', array_filter([
@@ -98,13 +114,17 @@ abstract class Controlador
         'reporte-arbitro' => '#a5b4fc',
         'reporte-incidencias' => '#fda4af',
         'reporte-goleadores' => '#facc15',
+        'login' => '#ffd200',
     ];
 
+    /** Pinta una plantilla HTML con título, color de pantalla y token CSRF. */
     protected function mostrarVista(Base $f3, string $vista, string $titulo, string $pagina, array $extra = []): void
     {
         $f3->set('title', $titulo);
         $f3->set('page', $pagina);
         $f3->set('acento', self::ACENTOS[$pagina] ?? '#ffd200');
+        $f3->set('csrf', Sesion::tokenCsrf($f3));
+        $f3->set('usuario', (string) $f3->get('SESSION.USU_Nombre_Usuario'));
 
         foreach ($extra as $clave => $valor) {
             $f3->set($clave, $valor);

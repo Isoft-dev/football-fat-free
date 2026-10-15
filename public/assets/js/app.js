@@ -7,7 +7,7 @@ import {
     fotoUrl,
     llenarSelect,
     mostrarAviso,
-} from './api.js?v=6';
+} from './api.js?v=7';
 
 const pagina = document.body.dataset.page;
 const POR_PAGINA = 8;
@@ -34,6 +34,7 @@ if (pagina === 'inicio') {
     iniciarGoleadores();
 }
 
+/** Fecha de hoy en YYYY-MM-DD para el max de inputs date. */
 function hoyIso() {
     const hoy = new Date();
 
@@ -44,6 +45,7 @@ function hoyIso() {
     ].join('-');
 }
 
+/** Vacía el buscador de una tabla. */
 function limpiarBusqueda(tbody) {
     const wrap = tbody && tbody.closest('.tabla-wrap');
     const barra = wrap && wrap.previousElementSibling;
@@ -57,6 +59,7 @@ function limpiarBusqueda(tbody) {
     }
 }
 
+/** Pone buscador y paginación sobre una tabla. */
 function activarTabla(tbody, porPagina = POR_PAGINA) {
     const wrap = tbody && tbody.closest('.tabla-wrap');
 
@@ -98,6 +101,7 @@ function activarTabla(tbody, porPagina = POR_PAGINA) {
     paginarTabla(tbody, porPagina);
 }
 
+/** Filtra y pagina las filas visibles de una tabla. */
 function paginarTabla(tbody, porPagina) {
     const wrap = tbody.closest('.tabla-wrap');
     const barra = wrap.previousElementSibling;
@@ -170,6 +174,7 @@ function paginarTabla(tbody, porPagina) {
     }
 }
 
+/** Portada: pide los conteos del marcador. */
 async function iniciarInicio() {
     try {
         const datos = await apiGet('/api/resumen');
@@ -183,11 +188,13 @@ async function iniciarInicio() {
     }
 }
 
+/** Pantalla equipos: listar, crear, editar y borrar. */
 async function iniciarEquipos() {
     const form = document.querySelector('#form-equipo');
     const mensaje = document.querySelector('#msg-equipo');
     const cancelar = document.querySelector('#cancelar-equipo');
 
+    /** Vuelve a pedir el catálogo y pinta la tabla. */
     async function cargar() {
         const datos = await apiGet('/api/equipos');
         const tbody = document.querySelector('#tabla-equipos');
@@ -261,11 +268,13 @@ async function iniciarEquipos() {
     }
 }
 
+/** Pantalla jornadas: calendario. */
 async function iniciarJornadas() {
     const form = document.querySelector('#form-jornada');
     const mensaje = document.querySelector('#msg-jornada');
     const cancelar = document.querySelector('#cancelar-jornada');
 
+    /** Vuelve a pedir el calendario y pinta la tabla. */
     async function cargar() {
         const datos = await apiGet('/api/jornadas');
         const tbody = document.querySelector('#tabla-jornadas');
@@ -337,6 +346,7 @@ async function iniciarJornadas() {
     await cargar();
 }
 
+/** Pantalla jugadores: alta con foto, edición y baja. */
 async function iniciarJugadores() {
     const form = document.querySelector('#form-jugador');
     const mensaje = document.querySelector('#msg-jugador');
@@ -347,6 +357,7 @@ async function iniciarJugadores() {
     const nacimiento = document.querySelector('#JUG_Fecha_Nacimiento');
     nacimiento.max = hoyIso();
 
+    /** Vuelve a pedir el plantel y pinta la tabla. */
     async function cargar() {
         const datos = await apiGet('/api/jugadores');
         const tbody = document.querySelector('#tabla-jugadores');
@@ -432,6 +443,7 @@ async function iniciarJugadores() {
     await cargar();
 }
 
+/** Ficha de un jugador: datos, goles e incidencias. */
 async function iniciarFicha() {
     const caja = document.querySelector('#ficha-jugador');
     const id = caja.dataset.id;
@@ -486,6 +498,7 @@ async function iniciarFicha() {
     `;
 }
 
+/** Pantalla goles: un total por jugador y jornada. */
 async function iniciarGoles() {
     const jugadores = await apiGet('/api/jugadores');
     const jornadas = await apiGet('/api/jornadas');
@@ -506,6 +519,7 @@ async function iniciarGoles() {
         'Seleccione una jornada'
     );
 
+    /** Vuelve a pedir los goles y pinta la tabla. */
     async function cargar() {
         const datos = await apiGet('/api/goles');
         const tbody = document.querySelector('#tabla-goles');
@@ -556,6 +570,7 @@ async function iniciarGoles() {
     await cargar();
 }
 
+/** Pantalla incidencias: tarjetas amarilla/roja. */
 async function iniciarIncidencias() {
     const jugadores = await apiGet('/api/jugadores');
     const catalogo = await apiGet('/api/incidencias');
@@ -572,6 +587,7 @@ async function iniciarIncidencias() {
     );
     llenarSelect(tipo, catalogo.tipos || [], 'TTA_Codigo', 'TTA_Nombre', 'Seleccione un tipo');
 
+    /** Roja: pide fecha de suspensión. Amarilla: la oculta. */
     function ajustarSuspension() {
         const roja = tipo.value === 'roja';
         suspension.required = roja;
@@ -585,6 +601,7 @@ async function iniciarIncidencias() {
     tipo.addEventListener('change', ajustarSuspension);
     ajustarSuspension();
 
+    /** Vuelve a pedir las tarjetas y pinta la tabla. */
     async function cargar(datosPrevios) {
         const datos = datosPrevios || await apiGet('/api/incidencias');
         const tbody = document.querySelector('#tabla-incidencias');
@@ -638,6 +655,7 @@ async function iniciarIncidencias() {
     await cargar(catalogo);
 }
 
+/** Reporte del árbitro: plantel de una jornada y quién está suspendido. */
 async function iniciarReporteArbitro() {
     const jornadas = await apiGet('/api/jornadas');
     const mensaje = document.querySelector('#msg-arbitro');
@@ -693,6 +711,7 @@ async function iniciarReporteArbitro() {
     });
 }
 
+/** Reporte de incidencias filtrado por equipo (y opcionalmente un jugador). */
 async function iniciarReporteIncidencias() {
     const equipos = await apiGet('/api/equipos');
     const jugadores = await apiGet('/api/jugadores');
@@ -702,6 +721,7 @@ async function iniciarReporteIncidencias() {
 
     llenarSelect(selectEquipo, equipos.equipos, 'EQU_Equipo', 'EQU_Nombre', 'Seleccione un equipo');
 
+    /** Llena el combo de jugadores según el equipo elegido. */
     function filtrarJugadores() {
         const equipoId = selectEquipo.value;
         const filtrados = jugadores.jugadores.filter((jugador) => String(jugador.EQU_Equipo) === equipoId);
@@ -756,6 +776,7 @@ async function iniciarReporteIncidencias() {
     });
 }
 
+/** Tabla de goleadores, de mayor a menor. */
 async function iniciarGoleadores() {
     const mensaje = document.querySelector('#msg-goleadores');
 

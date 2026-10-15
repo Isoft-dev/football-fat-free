@@ -24,7 +24,13 @@ La aplicación usa MySQL/MariaDB de XAMPP. Credenciales por defecto: usuario `ro
 2. Ejecutar `sql/01-crear-base-mysql.sql` (phpMyAdmin o cliente MySQL).
 3. Confirmar que `config/database.ini` tenga `driver=mysql` y la base `tor_futbol_infantil`.
 
-Para validar: abrir `http://localhost/phpmyadmin`, elegir `tor_futbol_infantil` y revisar las 6 tablas. También se puede usar `C:\xampp\mysql\bin\mysql.exe`.
+Para validar: abrir `http://localhost/phpmyadmin`, elegir `tor_futbol_infantil` y revisar las 7 tablas. También se puede usar `C:\xampp\mysql\bin\mysql.exe`.
+
+Si la base ya existía, ejecutar también `sql/03-crear-usuario-mysql.sql` o abrir cualquier página: la app crea `TOR_USUARIO` sola.
+
+## Entrar
+
+La contraseña se guarda hasheada en `TOR_USUARIO`.
 
 ## Instalar dependencias nuevamente
 

@@ -11,11 +11,13 @@ use Throwable;
 
 final class GolController extends Controlador
 {
+    /** Pinta la pantalla de registro de goles. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'goles.html', 'Goles', 'goles');
     }
 
+    /** Lista los goles por jugador y jornada. */
     public function listar(Base $f3): void
     {
         $filas = $this->db($f3)->exec(
@@ -50,6 +52,7 @@ final class GolController extends Controlador
         $this->json(['goles' => $filas]);
     }
 
+    /** Crea o actualiza los goles de un jugador en una jornada (un solo registro). */
     public function guardar(Base $f3): void
     {
         try {
@@ -123,6 +126,7 @@ final class GolController extends Controlador
         }
     }
 
+    /** Borra un registro de goles. */
     public function eliminar(Base $f3): void
     {
         try {

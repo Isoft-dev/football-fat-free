@@ -11,11 +11,13 @@ use Throwable;
 
 final class JornadaController extends Controlador
 {
+    /** Pinta la pantalla del calendario de jornadas. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'jornadas.html', 'Jornadas', 'jornadas');
     }
 
+    /** Lista las jornadas en JSON, con fecha en DD/MM/YYYY. */
     public function listar(Base $f3): void
     {
         $filas = $this->db($f3)->exec(
@@ -33,6 +35,7 @@ final class JornadaController extends Controlador
         $this->json(['jornadas' => $filas]);
     }
 
+    /** Da de alta una jornada. Número y fecha no pueden repetirse. */
     public function crear(Base $f3): void
     {
         try {
@@ -58,6 +61,7 @@ final class JornadaController extends Controlador
         }
     }
 
+    /** Actualiza número y fecha de una jornada. */
     public function actualizar(Base $f3): void
     {
         try {
@@ -91,6 +95,7 @@ final class JornadaController extends Controlador
         }
     }
 
+    /** Borra una jornada si todavía no tiene goles. */
     public function eliminar(Base $f3): void
     {
         try {
@@ -127,6 +132,7 @@ final class JornadaController extends Controlador
         }
     }
 
+    /** Traduce unique de número o fecha a un mensaje claro. */
     private function mensajeDuplicado(Throwable $error): string
     {
         $texto = $error->getMessage();

@@ -11,21 +11,25 @@ use InvalidArgumentException;
 
 final class ReporteController extends Controlador
 {
+    /** Pinta el reporte del árbitro (quién juega / quién está suspendido). */
     public function paginaArbitro(Base $f3): void
     {
         $this->mostrarVista($f3, 'reportes-arbitro.html', 'Lista para el árbitro', 'reporte-arbitro');
     }
 
+    /** Pinta el reporte de incidencias por equipo. */
     public function paginaIncidencias(Base $f3): void
     {
         $this->mostrarVista($f3, 'reportes-incidencias.html', 'Reporte de incidencias', 'reporte-incidencias');
     }
 
+    /** Pinta la tabla de goleadores. */
     public function paginaGoleadores(Base $f3): void
     {
         $this->mostrarVista($f3, 'reportes-goleadores.html', 'Tabla de goleadores', 'reporte-goleadores');
     }
 
+    /** JSON: plantel de una jornada con foto y si cada jugador está suspendido. */
     public function arbitro(Base $f3): void
     {
         try {
@@ -123,6 +127,7 @@ final class ReporteController extends Controlador
         }
     }
 
+    /** JSON: incidencias de un equipo, opcionalmente de un solo jugador. */
     public function incidencias(Base $f3): void
     {
         try {
@@ -193,6 +198,7 @@ final class ReporteController extends Controlador
         }
     }
 
+    /** JSON: total de goles por jugador, de mayor a menor. */
     public function goleadores(Base $f3): void
     {
         $filas = $this->db($f3)->exec(

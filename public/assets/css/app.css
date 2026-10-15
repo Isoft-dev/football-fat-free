@@ -206,6 +206,92 @@ a {
     line-height: 1;
 }
 
+/* Usuario en sesión y botón Salir. */
+.cuenta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.8rem;
+    align-items: center;
+}
+
+.cuenta p {
+    margin: 0;
+    color: var(--muted);
+    font-family: Oswald, Impact, sans-serif;
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.cuenta button {
+    padding: 0.38rem 0.85rem;
+}
+
+/* Login: una tarjeta compacta centrada, sin el cascarón vacío de la app. */
+body[data-page="login"] .numero-fondo {
+    display: none;
+}
+
+body[data-page="login"] .escena {
+    display: flex;
+    align-items: center;
+    width: min(26rem, calc(100% - 2.4rem));
+    min-height: calc(100vh - 3.2rem);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+body[data-page="login"] .app {
+    width: 100%;
+    min-height: 0;
+    background: var(--papel);
+}
+
+body[data-page="login"] .topbar {
+    display: none;
+}
+
+body[data-page="login"] .main {
+    background: transparent;
+}
+
+body[data-page="login"] .content {
+    width: 100%;
+    padding: 0 1.45rem 0.2rem;
+}
+
+body[data-page="login"] .masthead,
+body[data-page="login"] .pie {
+    padding-right: 1.45rem;
+    padding-left: 1.45rem;
+}
+
+body[data-page="login"] .login-caja {
+    max-width: none;
+    margin: 0.35rem 0 1.5rem;
+}
+
+body[data-page="login"] .login-caja .kicker {
+    margin-bottom: 0.35rem;
+    color: color-mix(in srgb, var(--acento-form) 42%, var(--ink));
+}
+
+body[data-page="login"] .login-caja h1 {
+    margin: 0 0 0.55rem;
+    color: var(--ink);
+    font-family: Oswald, Impact, sans-serif;
+    font-size: 2.15rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    text-transform: uppercase;
+}
+
+.login-caja {
+    max-width: 22rem;
+    margin: 1.4rem auto 2.4rem;
+}
+
 .nav-principal {
     display: flex;
     flex-wrap: wrap;

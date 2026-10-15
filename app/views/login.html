@@ -1,0 +1,20 @@
+<include href="partials/cabecera.html"/>
+
+<section class="login-caja">
+    <h1>Inicio de sesión</h1>
+    <form method="post" action="{{ @BASE }}/login" autocomplete="on">
+        <input type="hidden" name="csrf" value="{{ @csrf }}">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" name="usuario" type="text" maxlength="60" required autocomplete="username">
+        <label for="contrasena">Contraseña</label>
+        <input id="contrasena" name="contrasena" type="password" maxlength="72" required autocomplete="current-password">
+        <div class="acciones">
+            <button type="submit">Entrar</button>
+        </div>
+        <check if="{{ @error_login }}">
+            <p class="aviso aviso-error">{{ @error_login }}</p>
+        </check>
+    </form>
+</section>
+
+<include href="partials/pie.html"/>

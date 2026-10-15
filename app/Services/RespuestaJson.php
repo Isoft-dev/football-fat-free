@@ -6,6 +6,7 @@ namespace App\Services;
 
 final class RespuestaJson
 {
+    /** Envía un arreglo como JSON con el código HTTP indicado. */
     public static function enviar(array $datos, int $codigo = 200): void
     {
         http_response_code($codigo);
@@ -17,6 +18,7 @@ final class RespuestaJson
         );
     }
 
+    /** Envía `{ "error": "..." }` con el código HTTP. */
     public static function error(string $mensaje, int $codigo = 400): void
     {
         self::enviar(['error' => $mensaje], $codigo);

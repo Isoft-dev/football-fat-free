@@ -11,6 +11,7 @@ use Throwable;
 
 final class Conexion
 {
+    /** Abre MySQL (o SQLite) según config/database.ini y deja el esquema listo. */
     public static function abrir(Base $f3): SQL
     {
         $ruta = dirname(__DIR__, 2) . '/config/database.ini';
@@ -67,6 +68,7 @@ final class Conexion
         return $db;
     }
 
+    /** Comprueba que existan las tablas y aplica mejoras pendientes. */
     private static function asegurarEsquema(SQL $db): void
     {
         $driver = $db->driver();
@@ -89,6 +91,7 @@ final class Conexion
         self::aplicarMejoras($db);
     }
 
+    /** Crea las tablas si se usa SQLite de respaldo. */
     private static function crearEsquemaSqlite(SQL $db): void
     {
         $db->exec("
@@ -162,6 +165,14 @@ final class Conexion
                 CONSTRAINT CK_GOL_CANTIDAD CHECK (GOL_Cantidad > 0)
             )
         ");
+            $db->exec("
+            CREATE TABLE TOR_USUARIO (
+                USU_Usuario INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                USU_Nombre_Usuario TEXT NOT NULL,
+                USU_Hash_Contrasena TEXT NOT NULL,
+                CONSTRAINT UQ_USUARIO_NOMBRE UNIQUE (USU_Nombre_Usuario)
+            )
+        ");
         $db->exec("
             CREATE TABLE TOR_INCIDENCIA (
                 INC_Incidencia INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -184,14 +195,17 @@ final class Conexion
         ");
     }
 
+    /** Corre migraciones cortas (tipos de tarjeta, usuario, uniques, etc.). */
     private static function aplicarMejoras(SQL $db): void
     {
         self::asegurarTiposTarjeta($db);
+        self::asegurarUsuario($db);
         self::asegurarJornada($db);
         self::asegurarJugadorIdentidad($db);
         self::asegurarIncidenciaCatalogo($db);
     }
 
+    /** Asegura el catálogo amarilla/roja. */
     private static function asegurarTiposTarjeta(SQL $db): void
     {
         if (!self::tieneTabla($db, 'TOR_TIPO_TARJETA')) {
@@ -238,18 +252,64 @@ final class Conexion
         }
     }
 
+    /** Crea TOR_USUARIO y siembra admin / Torneo07 si la tabla está vacía. */
+    private static function asegurarUsuario(SQL $db): void
+    {
+        if (!self::tieneTabla($db, 'TOR_USUARIO')) {
+            if ($db->driver() === 'sqlite') {
+                $db->exec("
+                    CREATE TABLE TOR_USUARIO (
+                        USU_Usuario INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        USU_Nombre_Usuario TEXT NOT NULL,
+                        USU_Hash_Contrasena TEXT NOT NULL,
+                        CONSTRAINT UQ_USUARIO_NOMBRE UNIQUE (USU_Nombre_Usuario)
+                    )
+                ");
+            } else {
+                $db->exec("
+                    CREATE TABLE TOR_USUARIO (
+                        USU_Usuario INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                        USU_Nombre_Usuario VARCHAR(60) NOT NULL,
+                        USU_Hash_Contrasena VARCHAR(255) NOT NULL,
+                        CONSTRAINT PK_USUARIO PRIMARY KEY (USU_Usuario),
+                        CONSTRAINT UQ_USUARIO_NOMBRE UNIQUE (USU_Nombre_Usuario)
+                    )
+                ");
+            }
+        }
+
+        $filas = $db->exec(
+            'SELECT USU_Usuario
+               FROM TOR_USUARIO
+              ORDER BY USU_Usuario ASC'
+        );
+
+        if ($filas !== []) {
+            return;
+        }
+
+        $db->exec(
+            'INSERT INTO TOR_USUARIO (USU_Nombre_Usuario, USU_Hash_Contrasena)
+                  VALUES (?, ?)',
+            ['admin', password_hash('Torneo07', PASSWORD_DEFAULT)]
+        );
+    }
+
+    /** Índice único de fecha de jornada, si aún no existe. */
     private static function asegurarJornada(SQL $db): void
     {
         if (self::tieneIndice($db, 'TOR_JORNADA', 'UQ_JORNADA_FECHA')) {
             return;
         }
 
-        $db->exec(
+        self::crearIndiceSiFalta(
+            $db,
             'CREATE UNIQUE INDEX UQ_JORNADA_FECHA
                         ON TOR_JORNADA (JOR_Fecha_Juego)'
         );
     }
 
+    /** Unique de identidad del jugador (nombre + nacimiento + equipo). */
     private static function asegurarJugadorIdentidad(SQL $db): void
     {
         if (!self::tieneColumna($db, 'TOR_JUGADOR', 'JUG_Segundo_Nombre_Norm')) {
@@ -282,7 +342,8 @@ final class Conexion
             return;
         }
 
-        $db->exec(
+        self::crearIndiceSiFalta(
+            $db,
             'CREATE UNIQUE INDEX UQ_JUGADOR_IDENTIDAD
                         ON TOR_JUGADOR (
                             EQU_Equipo,
@@ -295,6 +356,7 @@ final class Conexion
         );
     }
 
+    /** Pasa INC_Tipo_Tarjeta (texto) a FK hacia TOR_TIPO_TARJETA, si hace falta. */
     private static function asegurarIncidenciaCatalogo(SQL $db): void
     {
         if (self::tieneColumna($db, 'TOR_INCIDENCIA', 'TTA_Tipo_Tarjeta')
@@ -311,6 +373,7 @@ final class Conexion
         self::reconstruirIncidenciaMysql($db);
     }
 
+    /** Reconstruye TOR_INCIDENCIA en SQLite con la FK de tipo de tarjeta. */
     private static function reconstruirIncidenciaSqlite(SQL $db): void
     {
         $db->exec("
@@ -356,6 +419,7 @@ final class Conexion
         $db->exec('ALTER TABLE TOR_INCIDENCIA_NUEVA RENAME TO TOR_INCIDENCIA');
     }
 
+    /** Mismo cambio de incidencias, en MySQL. */
     private static function reconstruirIncidenciaMysql(SQL $db): void
     {
         if (!self::tieneColumna($db, 'TOR_INCIDENCIA', 'TTA_Tipo_Tarjeta')) {
@@ -379,12 +443,16 @@ final class Conexion
         );
 
         if (!self::tieneIndice($db, 'TOR_INCIDENCIA', 'FK_INCIDENCIA_TIPO_TARJETA')) {
-            $db->exec(
-                'ALTER TABLE TOR_INCIDENCIA
-                        ADD CONSTRAINT FK_INCIDENCIA_TIPO_TARJETA
-                        FOREIGN KEY (TTA_Tipo_Tarjeta)
-                        REFERENCES TOR_TIPO_TARJETA (TTA_Tipo_Tarjeta)'
-            );
+            try {
+                $db->exec(
+                    'ALTER TABLE TOR_INCIDENCIA
+                            ADD CONSTRAINT FK_INCIDENCIA_TIPO_TARJETA
+                            FOREIGN KEY (TTA_Tipo_Tarjeta)
+                            REFERENCES TOR_TIPO_TARJETA (TTA_Tipo_Tarjeta)'
+                );
+            } catch (Throwable $error) {
+                // La FK ya existía.
+            }
         }
 
         try {
@@ -408,6 +476,7 @@ final class Conexion
         }
     }
 
+    /** ¿Existe esta tabla? */
     private static function tieneTabla(SQL $db, string $tabla): bool
     {
         if ($db->driver() === 'sqlite') {
@@ -423,18 +492,15 @@ final class Conexion
             return $filas !== [];
         }
 
-        $filas = $db->exec(
-            "SELECT TABLE_NAME
-               FROM information_schema.TABLES
-              WHERE UPPER(TABLE_NAME) = ?
-                AND TABLE_SCHEMA = DATABASE()
-              ORDER BY TABLE_NAME ASC",
-            [strtoupper($tabla)]
-        );
-
-        return $filas !== [];
+        try {
+            $db->exec('SELECT 1 FROM ' . self::nombreSql($tabla) . ' LIMIT 1');
+            return true;
+        } catch (Throwable $error) {
+            return false;
+        }
     }
 
+    /** ¿Existe esta columna? */
     private static function tieneColumna(SQL $db, string $tabla, string $columna): bool
     {
         if ($db->driver() === 'sqlite') {
@@ -449,19 +515,19 @@ final class Conexion
             return false;
         }
 
-        $filas = $db->exec(
-            "SELECT COLUMN_NAME
-               FROM information_schema.COLUMNS
-              WHERE UPPER(TABLE_NAME) = ?
-                AND UPPER(COLUMN_NAME) = ?
-                AND TABLE_SCHEMA = DATABASE()
-              ORDER BY COLUMN_NAME ASC",
-            [strtoupper($tabla), strtoupper($columna)]
-        );
-
-        return $filas !== [];
+        try {
+            $db->exec(
+                'SELECT ' . self::nombreSql($columna)
+                . ' FROM ' . self::nombreSql($tabla)
+                . ' LIMIT 1'
+            );
+            return true;
+        } catch (Throwable $error) {
+            return false;
+        }
     }
 
+    /** ¿Existe este índice? */
     private static function tieneIndice(SQL $db, string $tabla, string $indice): bool
     {
         if ($db->driver() === 'sqlite') {
@@ -476,16 +542,26 @@ final class Conexion
             return false;
         }
 
-        $filas = $db->exec(
-            "SELECT INDEX_NAME
-               FROM information_schema.STATISTICS
-              WHERE UPPER(TABLE_NAME) = ?
-                AND UPPER(INDEX_NAME) = ?
-                AND TABLE_SCHEMA = DATABASE()
-              ORDER BY INDEX_NAME ASC",
-            [strtoupper($tabla), strtoupper($indice)]
-        );
+        return false;
+    }
 
-        return $filas !== [];
+    /** Crea un índice; si ya existe, no corta el arranque. */
+    private static function crearIndiceSiFalta(SQL $db, string $sql): void
+    {
+        try {
+            $db->exec($sql);
+        } catch (Throwable $error) {
+            // 1061 Duplicate key name u otro índice ya presente.
+        }
+    }
+
+    /** Nombre de tabla/columna solo con letras, números y _. */
+    private static function nombreSql(string $nombre): string
+    {
+        if (preg_match('/^[A-Za-z0-9_]+$/', $nombre) !== 1) {
+            throw new RuntimeException('Nombre de tabla no válido.');
+        }
+
+        return '`' . $nombre . '`';
     }
 }

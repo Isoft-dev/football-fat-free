@@ -10,11 +10,13 @@ use Throwable;
 
 final class EquipoController extends Controlador
 {
+    /** Pinta la pantalla del catálogo de equipos. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'equipos.html', 'Equipos', 'equipos');
     }
 
+    /** Lista los equipos en JSON. */
     public function listar(Base $f3): void
     {
         $filas = $this->db($f3)->exec(
@@ -27,6 +29,7 @@ final class EquipoController extends Controlador
         $this->json(['equipos' => $filas]);
     }
 
+    /** Da de alta un equipo. El nombre no puede repetirse. */
     public function crear(Base $f3): void
     {
         try {
@@ -47,6 +50,7 @@ final class EquipoController extends Controlador
         }
     }
 
+    /** Cambia el nombre de un equipo. */
     public function actualizar(Base $f3): void
     {
         try {
@@ -74,6 +78,7 @@ final class EquipoController extends Controlador
         }
     }
 
+    /** Borra un equipo si todavía no tiene jugadores. */
     public function eliminar(Base $f3): void
     {
         try {
@@ -110,6 +115,7 @@ final class EquipoController extends Controlador
         }
     }
 
+    /** Traduce el error de unique de MySQL a un mensaje claro. */
     private function mensajeDuplicado(Throwable $error, string $alterno): string
     {
         $texto = $error->getMessage();

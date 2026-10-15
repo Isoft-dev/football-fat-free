@@ -8,11 +8,13 @@ use Base;
 
 final class HomeController extends Controlador
 {
+    /** Pinta la portada del torneo. */
     public function index(Base $f3): void
     {
         $this->mostrarVista($f3, 'inicio.html', 'Torneo infantil de fútbol', 'inicio');
     }
 
+    /** Devuelve los conteos del marcador (equipos, jornadas, jugadores, goles, tarjetas). */
     public function resumen(Base $f3): void
     {
         $db = $this->db($f3);

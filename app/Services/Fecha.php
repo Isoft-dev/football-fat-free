@@ -8,6 +8,7 @@ use InvalidArgumentException;
 
 final class Fecha
 {
+    /** Pasa una fecha de pantalla (DD/MM/YYYY) a ISO (YYYY-MM-DD) para MySQL. */
     public static function aIso(string $valor): string
     {
         $valor = trim($valor);
@@ -31,6 +32,7 @@ final class Fecha
         return sprintf('%04d-%02d-%02d', $anio, $mes, $dia);
     }
 
+    /** Rechaza una fecha posterior a hoy (nacimiento, etc.). */
     public static function noFutura(string $iso, string $campo = 'fecha'): string
     {
         if ($iso > date('Y-m-d')) {
@@ -40,6 +42,7 @@ final class Fecha
         return $iso;
     }
 
+    /** Pasa una fecha ISO a DD/MM/YYYY para mostrar en pantalla. */
     public static function aVista(?string $iso): string
     {
         if ($iso === null || $iso === '') {

@@ -11,7 +11,8 @@
         @view-transition { navigation: none; }
         html, body, .main, .panel, .topbar, .tabla-wrap thead th { transition: none !important; }
     </style>
-    <link rel="stylesheet" href="{{ @BASE }}/assets/css/app.css?v=9">
+    <link rel="stylesheet" href="{{ @BASE }}/assets/css/app.css?v=11">
+    <meta name="csrf" content="{{ @csrf }}">
 </head>
 <body data-page="{{ @page }}">
     <div id="alertas" class="alertas" aria-live="polite"></div>
@@ -38,6 +39,7 @@
                     <p class="brand">Fútbol</p>
                 </div>
             </a>
+            <check if="{{ @page!='login' }}">
             <nav class="nav-principal" aria-label="Principal">
                 <div class="nav-grupo">
                     <span class="nav-label">Torneo</span>
@@ -69,8 +71,15 @@
                     </div>
                 </div>
             </nav>
+            <form class="cuenta" method="post" action="{{ @BASE }}/salir">
+                <input type="hidden" name="csrf" value="{{ @csrf }}">
+                <p>{{ @usuario }}</p>
+                <button type="submit" class="secundario">Salir</button>
+            </form>
+            </check>
         </header>
         <div class="main">
+            <check if="{{ @page!='login' }}">
             <header class="topbar">
                 <p class="kicker">
                     <check if="{{ @page=='inicio' }}">Torneo</check>
@@ -81,6 +90,7 @@
                 </p>
                 <h1>{{ @title }}</h1>
             </header>
+            </check>
             <main class="content">
                 <check if="{{ @DB_ERROR }}">
                     <p class="aviso aviso-error">No hay conexión a la base de datos: {{ @DB_ERROR }}</p>
