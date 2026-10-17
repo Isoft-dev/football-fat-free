@@ -902,16 +902,44 @@ label:has(+ :required)::after {
     margin: 0.2rem 0;
 }
 
-/* Bloques por equipo en el reporte del árbitro. */
+/* Bloques por equipo en el reporte del árbitro: una tarjeta por equipo. */
 .grupo-equipo {
-    margin-top: 1.4rem;
+    margin-top: 1.6rem;
+    padding: 0.9rem 1rem 0.6rem;
+    background: var(--papel);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 4px 4px 0 color-mix(in srgb, var(--acento-form) 38%, var(--ink));
 }
 
-.grupo-equipo h2 {
-    font-family: Oswald, Impact, sans-serif;
+.grupo-equipo-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.3rem 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--acento-form);
+}
+
+.grupo-equipo-cabecera h2 {
+    margin: 0;
     color: var(--ink);
+    font-size: 1.5rem;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    text-transform: uppercase;
+}
+
+.grupo-equipo-cabecera p {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* Sin scroll interno: cada equipo muestra a todos sus jugadores. */
+.grupo-equipo .tabla-wrap {
+    max-height: none;
+    border: 0;
+    border-radius: 0;
 }
 
 /* Posición y total en el reporte de goleadores. */
@@ -1018,5 +1046,141 @@ body[data-page="reporte-goleadores"] #tabla-goleadores tr.lider .num-goles {
     button,
     .boton {
         transition: none;
+    }
+}
+
+/* --- Impresión de reportes --- */
+
+/* Encabezado que solo sale en papel (jornada / equipo y fecha de impresión). */
+.solo-impresion {
+    display: none;
+}
+
+@media print {
+    @page {
+        margin: 1.2cm;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    .fondo-escena,
+    .grano,
+    .numero-fondo,
+    .alertas,
+    .confirmacion,
+    .barra-superior,
+    .masthead,
+    .topbar .kicker,
+    .pie,
+    .filtros,
+    .acciones,
+    .lead,
+    .aviso,
+    .lista-barra {
+        display: none !important;
+    }
+
+    .solo-impresion {
+        display: block;
+        margin: 0.3rem 0 0.8rem;
+        font-weight: 600;
+    }
+
+    .escena,
+    .topbar,
+    .content {
+        width: auto;
+        margin: 0;
+    }
+
+    .app {
+        overflow: visible;
+        min-height: 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .main {
+        background: none;
+    }
+
+    .topbar {
+        padding: 0;
+    }
+
+    .topbar h1 {
+        font-size: 1.8rem;
+        text-shadow: none;
+    }
+
+    .panel,
+    .panel:has(.filtros) {
+        padding: 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+    }
+
+    /* Sin scroll interno: la tabla completa fluye entre páginas. */
+    .tabla-wrap {
+        max-height: none;
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .tabla-wrap thead th {
+        position: static;
+        background: none;
+        box-shadow: none;
+    }
+
+    th,
+    td {
+        padding: 0.35rem 0.5rem;
+    }
+
+    tbody tr.fila-alt,
+    tbody tr:hover {
+        background: none;
+    }
+
+    tr {
+        break-inside: avoid;
+    }
+
+    .foto {
+        width: 2.6rem;
+        height: 2.6rem;
+        box-shadow: 0 0 0 1px var(--ink);
+    }
+
+    /* Conserva el color de las etiquetas (suspendido, tarjetas). */
+    .badge {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Árbitro: los equipos van seguidos, pero ninguno se parte entre dos hojas. */
+    .grupo-equipo {
+        margin-top: 1.2rem;
+        padding: 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+
+    .grupo-equipo-cabecera {
+        border-bottom: 2px solid var(--ink);
+        break-after: avoid;
+    }
+
+    .grupo-equipo-cabecera h2 {
+        font-size: 1.25rem;
     }
 }

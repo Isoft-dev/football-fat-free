@@ -28,6 +28,18 @@ Para validar: abrir `http://localhost/phpmyadmin`, elegir `tor_futbol_infantil` 
 
 Si la base ya existía, ejecutar también `sql/03-crear-usuario-mysql.sql` o abrir cualquier página: la app crea `TOR_USUARIO` sola.
 
+### Datos de ejemplo
+
+`sql/05-sembrar-datos-mysql.sql` **borra** equipos, jornadas, jugadores, goles e incidencias y carga un torneo completo: 4 equipos, 8 jornadas (6 jugadas, 2 por jugar), 24 jugadores con foto, goles y tarjetas. No toca usuarios.
+
+```powershell
+cmd /c "C:\xampp\mysql\bin\mysql.exe -uroot --default-character-set=utf8mb4 < sql\05-sembrar-datos-mysql.sql"
+```
+
+(o importarlo desde phpMyAdmin).
+
+Con estos datos el reporte del árbitro de la jornada 7 muestra dos suspendidos, la de la jornada 8 uno, y la tabla de goleadores tiene líder, empates y jugadores en cero.
+
 ## Entrar
 
 La contraseña se guarda hasheada en `TOR_USUARIO`.

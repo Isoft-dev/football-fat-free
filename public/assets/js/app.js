@@ -34,6 +34,28 @@ if (pagina === 'inicio') {
     iniciarGoleadores();
 }
 
+document.querySelector('#imprimir-reporte')?.addEventListener('click', () => window.print());
+
+// Al imprimir (botón o Ctrl+P) se muestran todas las filas, sin paginar.
+window.addEventListener('beforeprint', () => {
+    const encabezado = document.querySelector('#detalle-impresion');
+
+    if (encabezado) {
+        encabezado.textContent = [
+            encabezado.dataset.detalle,
+            `Impreso el ${hoyIso().split('-').reverse().join('/')}`,
+        ].filter(Boolean).join(' · ');
+    }
+
+    document.querySelectorAll('tbody[data-por-pagina]').forEach((tbody) => paginarTabla(tbody, Infinity));
+});
+
+window.addEventListener('afterprint', () => {
+    document.querySelectorAll('tbody[data-por-pagina]').forEach((tbody) => (
+        paginarTabla(tbody, Number(tbody.dataset.porPagina))
+    ));
+});
+
 /** Fecha de hoy en YYYY-MM-DD para el max de inputs date. */
 function hoyIso() {
     const hoy = new Date();
@@ -98,7 +120,22 @@ function activarTabla(tbody, porPagina = POR_PAGINA) {
     }
 
     tbody.dataset.pagina = '1';
+    tbody.dataset.porPagina = String(porPagina);
     paginarTabla(tbody, porPagina);
+}
+
+/** Muestra el botón Imprimir y guarda el detalle del encabezado impreso (vacío lo oculta). */
+function prepararImpresion(detalle) {
+    const boton = document.querySelector('#imprimir-reporte');
+    const encabezado = document.querySelector('#detalle-impresion');
+
+    if (boton) {
+        boton.hidden = !detalle;
+    }
+
+    if (encabezado) {
+        encabezado.dataset.detalle = detalle;
+    }
 }
 
 /** Filtra y pagina las filas visibles de una tabla. */
@@ -119,9 +156,13 @@ function paginarTabla(tbody, porPagina) {
         paginaActual = paginas;
     }
 
-    tbody.dataset.pagina = String(paginaActual);
+    // Al imprimir (porPagina = Infinity) no se pierde la página en la que estaba.
+    if (Number.isFinite(porPagina)) {
+        tbody.dataset.pagina = String(paginaActual);
+    }
 
-    const desde = (paginaActual - 1) * porPagina;
+    // Sin paginar (Infinity) se empieza en 0: 0 * Infinity daría NaN y ocultaría todo.
+    const desde = Number.isFinite(porPagina) ? (paginaActual - 1) * porPagina : 0;
     const hasta = desde + porPagina;
 
     filas.forEach((fila) => {
@@ -673,9 +714,18 @@ async function iniciarReporteArbitro() {
         try {
             const datos = await apiGet(`/api/reportes/arbitro?jornada=${document.querySelector('#jornada').value}`);
             mostrarAviso(mensaje, `Jornada ${datos.jornada.JOR_Numero} · ${datos.jornada.JOR_Fecha_Juego_Vista}`);
-            document.querySelector('#lista-arbitro').innerHTML = datos.equipos.map((equipo) => `
+            document.querySelector('#lista-arbitro').innerHTML = datos.equipos.map((equipo) => {
+                const suspendidos = equipo.jugadores.filter((jugador) => jugador.suspendido).length;
+
+                return `
                 <section class="grupo-equipo">
-                    <h2>${esc(equipo.EQU_Nombre)}</h2>
+                    <header class="grupo-equipo-cabecera">
+                        <h2>${esc(equipo.EQU_Nombre)}</h2>
+                        <p>
+                            ${equipo.jugadores.length} jugadores
+                            ${suspendidos ? `· <span class="badge badge-roja">${suspendidos} suspendido${suspendidos > 1 ? 's' : ''}</span>` : ''}
+                        </p>
+                    </header>
                     <div class="tabla-wrap">
                         <table>
                             <thead>
@@ -703,9 +753,11 @@ async function iniciarReporteArbitro() {
                         </table>
                     </div>
                 </section>
-            `).join('') || '<p>No hay equipos con jugadores.</p>';
-            document.querySelectorAll('#lista-arbitro tbody').forEach((cuerpo) => activarTabla(cuerpo, 10));
+            `;
+            }).join('') || '<p>No hay equipos con jugadores.</p>';
+            prepararImpresion(`Jornada ${datos.jornada.JOR_Numero} · ${datos.jornada.JOR_Fecha_Juego_Vista}`);
         } catch (error) {
+            prepararImpresion('');
             mostrarAviso(mensaje, error.message, 'error');
         }
     });
@@ -719,13 +771,14 @@ async function iniciarReporteIncidencias() {
     const selectEquipo = document.querySelector('#equipo');
     const selectJugador = document.querySelector('#jugador');
 
-    llenarSelect(selectEquipo, equipos.equipos, 'EQU_Equipo', 'EQU_Nombre', 'Seleccione un equipo');
+    llenarSelect(selectEquipo, equipos.equipos, 'EQU_Equipo', 'EQU_Nombre', 'Todos los equipos');
 
-    /** Llena el combo de jugadores según el equipo elegido. */
+    /** Llena el combo de jugadores según el equipo elegido (sin equipo no se filtra por jugador). */
     function filtrarJugadores() {
         const equipoId = selectEquipo.value;
         const filtrados = jugadores.jugadores.filter((jugador) => String(jugador.EQU_Equipo) === equipoId);
         llenarSelect(selectJugador, filtrados, 'JUG_Jugador', 'JUG_Nombre_Completo', 'Todos los jugadores');
+        selectJugador.disabled = !equipoId;
     }
 
     selectEquipo.addEventListener('change', filtrarJugadores);
@@ -734,13 +787,23 @@ async function iniciarReporteIncidencias() {
     document.querySelector('#form-rep-incidencias').addEventListener('submit', async (evento) => {
         evento.preventDefault();
         const jugador = selectJugador.value;
-        const query = jugador
-            ? `/api/reportes/incidencias?equipo=${selectEquipo.value}&jugador=${jugador}`
-            : `/api/reportes/incidencias?equipo=${selectEquipo.value}`;
+        const parametros = new URLSearchParams();
+
+        if (selectEquipo.value) {
+            parametros.set('equipo', selectEquipo.value);
+        }
+
+        if (selectEquipo.value && jugador) {
+            parametros.set('jugador', jugador);
+        }
+
+        const query = `/api/reportes/incidencias?${parametros}`;
 
         try {
             const datos = await apiGet(query);
-            mostrarAviso(mensaje, `Equipo ${datos.equipo.EQU_Nombre}`);
+            const general = !datos.equipo;
+            const titulo = general ? 'Todos los equipos' : `Equipo ${datos.equipo.EQU_Nombre}`;
+            mostrarAviso(mensaje, titulo);
             document.querySelector('#lista-incidencias').innerHTML = `
                 <div class="tabla-wrap">
                     <table>
@@ -748,6 +811,7 @@ async function iniciarReporteIncidencias() {
                             <tr>
                                 <th>Foto</th>
                                 <th>Jugador</th>
+                                ${general ? '<th>Equipo</th>' : ''}
                                 <th>Fecha</th>
                                 <th>Tarjeta</th>
                                 <th>Descripción</th>
@@ -759,18 +823,23 @@ async function iniciarReporteIncidencias() {
                                 <tr>
                                     <td><img class="foto" src="${esc(fotoUrl(incidencia.JUG_Fotografia))}" alt=""></td>
                                     <td>${esc(incidencia.JUG_Nombre_Completo)}</td>
+                                    ${general ? `<td>${esc(incidencia.EQU_Nombre)}</td>` : ''}
                                     <td>${esc(incidencia.INC_Fecha_Incidencia_Vista)}</td>
                                     <td><span class="badge badge-${esc(incidencia.INC_Tipo_Tarjeta)}">${esc(incidencia.INC_Tipo_Tarjeta_Nombre || incidencia.INC_Tipo_Tarjeta)}</span></td>
                                     <td>${esc(incidencia.INC_Descripcion)}</td>
                                     <td>${esc(incidencia.INC_Fecha_Suspension_Vista || '—')}</td>
                                 </tr>
-                            `).join('') || '<tr class="fila-vacia"><td colspan="6">Sin incidencias para este filtro.</td></tr>'}
+                            `).join('') || `<tr class="fila-vacia"><td colspan="${general ? 7 : 6}">Sin incidencias para este filtro.</td></tr>`}
                         </tbody>
                     </table>
                 </div>
             `;
             activarTabla(document.querySelector('#lista-incidencias tbody'));
+            prepararImpresion(general ? titulo : `${titulo} · ${
+                jugador ? selectJugador.selectedOptions[0].textContent : 'Todos los jugadores'
+            }`);
         } catch (error) {
+            prepararImpresion('');
             mostrarAviso(mensaje, error.message, 'error');
         }
     });
@@ -792,6 +861,7 @@ async function iniciarGoleadores() {
             </tr>
         `).join('') || '<tr class="fila-vacia"><td colspan="5">No hay jugadores.</td></tr>';
         activarTabla(document.querySelector('#tabla-goleadores'));
+        prepararImpresion('Goles totales del torneo');
     } catch (error) {
         mostrarAviso(mensaje, error.message, 'error');
     }

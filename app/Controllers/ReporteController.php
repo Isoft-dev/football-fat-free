@@ -17,7 +17,7 @@ final class ReporteController extends Controlador
         $this->mostrarVista($f3, 'reportes-arbitro.html', 'Lista para el árbitro', 'reporte-arbitro');
     }
 
-    /** Pinta el reporte de incidencias por equipo. */
+    /** Pinta el reporte de incidencias (por equipo o general). */
     public function paginaIncidencias(Base $f3): void
     {
         $this->mostrarVista($f3, 'reportes-incidencias.html', 'Reporte de incidencias', 'reporte-incidencias');
@@ -127,26 +127,33 @@ final class ReporteController extends Controlador
         }
     }
 
-    /** JSON: incidencias de un equipo, opcionalmente de un solo jugador. */
+    /** JSON: incidencias de un equipo (o de un solo jugador); sin equipo, de todos. */
     public function incidencias(Base $f3): void
     {
         try {
-            $equipoId = $this->entero($f3->get('GET.equipo'), 'equipo');
+            // Sin equipo: reporte general de todos los equipos.
+            $todos = (string) $f3->get('GET.equipo') === '';
+            $equipoId = $todos ? 0 : $this->entero($f3->get('GET.equipo'), 'equipo');
             $jugadorFiltro = filter_var($f3->get('GET.jugador'), FILTER_VALIDATE_INT);
             $db = $this->db($f3);
+            $equipo = null;
 
-            $equipo = $db->exec(
-                'SELECT EQU_Equipo,
-                        EQU_Nombre
-                   FROM TOR_EQUIPO
-                  WHERE EQU_Equipo = ?
-                  ORDER BY EQU_Equipo ASC',
-                [$equipoId]
-            );
+            if (!$todos) {
+                $encontrado = $db->exec(
+                    'SELECT EQU_Equipo,
+                            EQU_Nombre
+                       FROM TOR_EQUIPO
+                      WHERE EQU_Equipo = ?
+                      ORDER BY EQU_Equipo ASC',
+                    [$equipoId]
+                );
 
-            if ($equipo === []) {
-                $this->error('El equipo no existe.', 404);
-                return;
+                if ($encontrado === []) {
+                    $this->error('El equipo no existe.', 404);
+                    return;
+                }
+
+                $equipo = $encontrado[0];
             }
 
             $sql = 'SELECT INC.INC_Incidencia,
@@ -160,21 +167,29 @@ final class ReporteController extends Controlador
                            JUG.JUG_Segundo_Nombre,
                            JUG.JUG_Primer_Apellido,
                            JUG.JUG_Segundo_Apellido,
-                           JUG.JUG_Fotografia
+                           JUG.JUG_Fotografia,
+                           EQU.EQU_Nombre
                       FROM TOR_INCIDENCIA INC
                 INNER JOIN TOR_TIPO_TARJETA TTA
                         ON TTA.TTA_Tipo_Tarjeta = INC.TTA_Tipo_Tarjeta
                 INNER JOIN TOR_JUGADOR JUG
                         ON JUG.JUG_Jugador = INC.JUG_Jugador
-                     WHERE JUG.EQU_Equipo = ?';
-            $params = [$equipoId];
+                INNER JOIN TOR_EQUIPO EQU
+                        ON EQU.EQU_Equipo = JUG.EQU_Equipo';
+            $params = [];
 
-            if ($jugadorFiltro !== false && $jugadorFiltro > 0) {
-                $sql .= ' AND JUG.JUG_Jugador = ?';
-                $params[] = $jugadorFiltro;
+            if (!$todos) {
+                $sql .= ' WHERE JUG.EQU_Equipo = ?';
+                $params[] = $equipoId;
+
+                if ($jugadorFiltro !== false && $jugadorFiltro > 0) {
+                    $sql .= ' AND JUG.JUG_Jugador = ?';
+                    $params[] = $jugadorFiltro;
+                }
             }
 
-            $sql .= ' ORDER BY JUG.JUG_Primer_Apellido ASC,
+            $sql .= ' ORDER BY EQU.EQU_Nombre ASC,
+                               JUG.JUG_Primer_Apellido ASC,
                                INC.INC_Fecha_Incidencia ASC';
 
             $filas = $db->exec($sql, $params);
@@ -190,7 +205,7 @@ final class ReporteController extends Controlador
             }
 
             $this->json([
-                'equipo' => $equipo[0],
+                'equipo' => $equipo,
                 'incidencias' => $filas,
             ]);
         } catch (InvalidArgumentException $error) {
